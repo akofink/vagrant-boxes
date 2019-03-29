@@ -1,0 +1,56 @@
+---
+- hosts: all
+  tasks:
+    - name: register with subscription-manager
+      become: true
+      redhat_subscription:
+        server_hostname: https://subscription.rhsm.stage.redhat.com
+        server_insecure: true
+        username: rhn-engineering-akofink
+        password: redhat
+        force_register: true
+        pool_ids:
+          - 8a85f98c60c4fc0e0160c50f8b23045d
+    # - name: enable RH repositories
+    #   rhsm_repository:
+    #     name: rhel-7-server-rpms
+    - name: install epel
+      become: true
+      yum:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    - name: install system dependencies
+      become: true
+      yum:
+        name: openscap-scanner, scap-security-guide, make, rpm-build, python2-devel, sudo, git
+    - name: install pip
+      become: true
+      command: easy_install pip
+    - name: run oscap
+      command: oscap xccdf eval --profile standard --results rhel7-content_profile_common.xml /usr/share/xml/scap/ssg/content/ssg-rhel7-ds.xml
+      ignore_errors: true
+      args:
+        creates: rhel7-content_profile_common.xml
+    - name: install insights-client
+      become: true
+      command: sh lay-the-eggs.sh
+      args:
+        chdir: /home/vagrant/insights-client
+    - name: update config
+      become: true
+      blockinfile:
+        path: /etc/insights-client/insights-client.conf
+        block: |
+          upload_url=http://localhost:8080/r/insights/platform/upload/api/v1/upload
+          auto_config=False
+          auto_update=False
+    - name: Install insights from local filesystem via pip
+      become: true
+      pip:
+        name: file:///home/vagrant/insights-core#egg=insights
+        extra_args: "-I"
+    - name: set motd
+      become: true
+      lineinfile:
+        path: /etc/motd
+        line: 'sudo BYPASS_GPG=true insights-client --no-gpg --payload rhel7-content_profile_common.xml --content-type application/vnd.redhat.compliance.something+tgz'
+...

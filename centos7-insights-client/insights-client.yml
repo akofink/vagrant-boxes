@@ -1,0 +1,46 @@
+---
+- hosts: all
+  tasks:
+    - name: install system dependencies
+      become: true
+      yum:
+        name: subscription-manager, openscap-scanner, scap-security-guide, make, rpm-build, python2-devel, sudo, git
+    - name: install pip
+      become: true
+      command: easy_install pip
+    - name: Install insights from local filesystem via pip
+      become: true
+      pip:
+        name: file:///home/vagrant/insights-core#egg=insights
+        extra_args: "-I"
+    - name: register with subscription-manager
+      become: true
+      redhat_subscription:
+        server_hostname: https://subscription.rhsm.stage.redhat.com
+        server_insecure: true
+        username: rhn-engineering-akofink
+        password: redhat
+    - name: run oscap
+      command: oscap xccdf eval --profile standard --results centos7-content_profile_common.xml /usr/share/xml/scap/ssg/content/ssg-centos7-ds.xml
+      ignore_errors: true
+      args:
+        creates: centos7-content_profile_common.xml
+    # - name: install insights-client
+    #   become: true
+    #   command: sh lay-the-eggs.sh
+    #   args:
+    #     chdir: /home/vagrant/insights-client
+    - name: update config
+      become: true
+      blockinfile:
+        path: /etc/insights-client/insights-client.conf
+        block: |
+          upload_url=http://localhost:8080/r/insights/platform/upload/api/v1/upload
+          auto_config=False
+          auto_update=False
+    - name: set motd
+      become: true
+      lineinfile:
+        path: /etc/motd
+        line: 'sudo BYPASS_GPG=true insights-client --no-gpg --payload centos7-content_profile_common.xml --content-type application/vnd.redhat.compliance.something+tgz'
+...
