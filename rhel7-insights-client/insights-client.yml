@@ -40,7 +40,9 @@
       blockinfile:
         path: /etc/insights-client/insights-client.conf
         block: |
-          upload_url=http://localhost:8080/r/insights/platform/upload/api/v1/upload
+          #upload_url=https://ci.cloud.paas.upshift.redhat.com/api/ingress/v1/upload
+          #cert_verify=False
+          upload_url=http://localhost:8080/api/ingress/v1/upload
           auto_config=False
           auto_update=False
     - name: Install insights from local filesystem via pip
