@@ -3,7 +3,8 @@ Vagrant.configure("2") do |config|
   config.vm.box = "rhel7_6"
   config.vm.provider :libvirt do |libvirt|
     libvirt.memory = 4096
-    libvirt.cpus = 6
+    libvirt.cpus = 4
+    libvirt.qemu_use_session = false
   end
 
   config.vm.hostname = "rhel7-insights-client.virbr0.akofink-laptop"
