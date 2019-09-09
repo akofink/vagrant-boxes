@@ -15,7 +15,7 @@
     - name: enable RH repositories
       become: true
       command: subscription-manager repos --enable rhel-7-server-rpms
-    #   rhsm_repository: # does not work :(
+    #   rhsm_repository:
     #     name: rhel-7-server-rpms
 
     - name: install epel

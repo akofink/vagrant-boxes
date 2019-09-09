@@ -1,0 +1,91 @@
+---
+- hosts: all
+  tasks:
+    - name: register with subscription-manager
+      become: true
+      redhat_subscription:
+        server_hostname: https://subscription.rhsm.stage.redhat.com
+        server_insecure: true
+        username: rhn-engineering-akofink
+        # password: "{{ rhsm_password }}"
+        password: redhat
+        force_register: true
+        pool_ids:
+          - 8a85f98c60c4fc0e0160c50f812d0430
+
+    - name: enable RH repositories
+      become: true
+      rhsm_repository:
+        name:
+          - rhel-6-server-rpms
+          - rhel-server-rhscl-6-rpms
+
+    - name: install epel
+      become: true
+      yum:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+
+    - name: install system dependencies
+      become: true
+      yum:
+        name:
+          - insights-client
+          - python27-python-pip
+          - openscap-scanner
+          - scap-security-guide
+          - make
+          - rpm-build
+          - python2-devel
+          - sudo
+          - git
+
+    - name: "run oscap for ds"
+      command: "oscap xccdf eval --profile {{ item }} --results rhel6-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel6-ds.xml"
+      ignore_errors: true
+      args:
+        creates: "rhel6-{{ item }}.xml"
+      loop:
+        - xccdf_org.ssgproject.content_profile_standard
+        - xccdf_org.ssgproject.content_profile_CS2
+        - xccdf_org.ssgproject.content_profile_common
+        - xccdf_org.ssgproject.content_profile_server
+        - xccdf_org.ssgproject.content_profile_stig-rhel6-server-upstream
+        - xccdf_org.ssgproject.content_profile_usgcb-rhel6-server
+        - xccdf_org.ssgproject.content_profile_rht-ccp
+        - xccdf_org.ssgproject.content_profile_CSCF-RHEL6-MLS
+        - xccdf_org.ssgproject.content_profile_C2S
+        - xccdf_org.ssgproject.content_profile_pci-dss
+        - xccdf_org.ssgproject.content_profile_nist-cl-il-al
+
+    # - name: install insights-client
+    #   become: true
+    #   command: sh lay-the-eggs.sh
+    #   args:
+    #     chdir: /home/vagrant/insights-client
+
+    - name: update config
+      become: true
+      blockinfile:
+        path: /etc/insights-client/insights-client.conf
+        block: |
+          #upload_url=https://ci.cloud.paas.psi.redhat.com/api/ingress/v1/upload
+          cert_verify=False
+          upload_url=http://localhost:8080/api/ingress/v1/upload
+          auto_config=False
+          auto_update=False
+          legacy_upload=False
+
+    # - name: Install insights from local filesystem via pip
+    #   become: true
+    #   pip:
+    #     name: file:///home/vagrant/insights-core#egg=insights
+    #     extra_args: "-I"
+
+    - name: set motd
+      become: true
+      blockinfile:
+        path: /etc/motd
+        block: |
+          sudo BYPASS_GPG=true insights-client --no-gpg --payload rhel6-xccdf_org.ssgproject.content_profile_standard.xml --content-type application/vnd.redhat.compliance.something+tgz --net-debug
+          find ~/rhel6-xccdf_org.ssgproject.content_profile_*.xml | xargs -I{} sudo BYPASS_GPG=true insights-client --no-gpg --payload {} --content-type application/vnd.redhat.compliance.something+tgz --net-debug
+...

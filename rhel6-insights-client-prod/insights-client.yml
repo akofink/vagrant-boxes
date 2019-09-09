@@ -1,0 +1,47 @@
+---
+- hosts: all
+  tasks:
+    - name: register with subscription-manager
+      become: true
+      redhat_subscription:
+        # server_hostname: https://subscription.rhsm.stage.redhat.com
+        # server_insecure: true
+        username: rhn-engineering-akofink
+        password: "{{ rhsm_password }}"
+        force_register: true
+        pool_ids:
+          - 8a85f99269fd553d016a693c79ff26f5
+    - name: enable RH repositories
+      become: true
+      rhsm_repository:
+        name: rhel-6-server-rpms
+    - name: install epel
+      become: true
+      yum:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+    - name: install scap and insights-client
+      become: true
+      yum:
+        name: openscap-scanner, scap-security-guide, insights-client
+    - name: "run oscap for ds"
+      command: "oscap xccdf eval --profile {{ item }} --results rhel6-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel6-ds.xml"
+      ignore_errors: true
+      args:
+        creates: "rhel6-{{ item }}.xml"
+      loop:
+        - xccdf_org.ssgproject.content_profile_pci-dss
+        - xccdf_org.ssgproject.content_profile_ospp42
+        - xccdf_org.ssgproject.content_profile_nist-800-171-cui
+        - xccdf_org.ssgproject.content_profile_stig-rhel7-disa
+        - xccdf_org.ssgproject.content_profile_rht-ccp
+        - xccdf_org.ssgproject.content_profile_hipaa
+        - xccdf_org.ssgproject.content_profile_ospp
+        - xccdf_org.ssgproject.content_profile_standard
+        - xccdf_org.ssgproject.content_profile_C2S
+        - xccdf_org.ssgproject.content_profile_cjis
+    - name: set motd
+      become: true
+      lineinfile:
+        path: /etc/motd
+        line: 'sudo insights-client --payload ~/rhel6-xccdf_org.ssgproject.content_profile_standard.xml --content-type application/vnd.redhat.compliance.something+tgz'
+...
