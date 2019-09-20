@@ -19,38 +19,30 @@
     #   become: true
     #   command: subscription-manager repos --enable rhel-8-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms
     #   rhsm_repository:
-    #     name: rhel-8-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms
+    #     name: rhel-8-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms # enabled by default
 
     - name: install epel
       become: true
       yum:
         name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
-    # - name: install system dependencies
-    #   become: true
-    #   yum:
-    #     name: openscap-scanner, scap-security-guide, make, rpm-build, python2-devel, sudo, git
+    - name: install system dependencies
+      become: true
+      yum:
+        name: openscap-scanner, scap-security-guide, make, rpm-build, python2-devel, sudo, git
 
     # - name: install pip
     #   become: true
     #   command: easy_install pip
 
-    #- name: "run oscap for ds"
-    #  command: "oscap xccdf eval --profile {{ item }} --results rhel8-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml"
-    #  ignore_errors: true
-    #  args:
-    #    creates: "rhel8-{{ item }}.xml"
-    #  loop:
-    #    - xccdf_org.ssgproject.content_profile_pci-dss
-    #    - xccdf_org.ssgproject.content_profile_ospp42
-    #    - xccdf_org.ssgproject.content_profile_nist-800-171-cui
-    #    - xccdf_org.ssgproject.content_profile_stig-rhel7-disa
-    #    - xccdf_org.ssgproject.content_profile_rht-ccp
-    #    - xccdf_org.ssgproject.content_profile_hipaa
-    #    - xccdf_org.ssgproject.content_profile_ospp
-    #    - xccdf_org.ssgproject.content_profile_standard
-    #    - xccdf_org.ssgproject.content_profile_C2S
-    #    - xccdf_org.ssgproject.content_profile_cjis
+    - name: "run oscap for ds"
+      command: "oscap xccdf eval --profile {{ item }} --results rhel8-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml"
+      ignore_errors: true
+      args:
+        creates: "rhel8-{{ item }}.xml"
+      loop:
+        - xccdf_org.ssgproject.content_profile_pci-dss
+        - xccdf_org.ssgproject.content_profile_ospp
 
     #- name: install insights-client
     #  become: true

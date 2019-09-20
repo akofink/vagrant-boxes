@@ -29,16 +29,17 @@
       args:
         creates: "rhel6-{{ item }}.xml"
       loop:
-        - xccdf_org.ssgproject.content_profile_pci-dss
-        - xccdf_org.ssgproject.content_profile_ospp42
-        - xccdf_org.ssgproject.content_profile_nist-800-171-cui
-        - xccdf_org.ssgproject.content_profile_stig-rhel7-disa
-        - xccdf_org.ssgproject.content_profile_rht-ccp
-        - xccdf_org.ssgproject.content_profile_hipaa
-        - xccdf_org.ssgproject.content_profile_ospp
         - xccdf_org.ssgproject.content_profile_standard
+        - xccdf_org.ssgproject.content_profile_CS2
+        - xccdf_org.ssgproject.content_profile_common
+        - xccdf_org.ssgproject.content_profile_server
+        - xccdf_org.ssgproject.content_profile_stig-rhel6-server-upstream
+        - xccdf_org.ssgproject.content_profile_usgcb-rhel6-server
+        - xccdf_org.ssgproject.content_profile_rht-ccp
+        - xccdf_org.ssgproject.content_profile_CSCF-RHEL6-MLS
         - xccdf_org.ssgproject.content_profile_C2S
-        - xccdf_org.ssgproject.content_profile_cjis
+        - xccdf_org.ssgproject.content_profile_pci-dss
+        - xccdf_org.ssgproject.content_profile_nist-cl-il-al
     - name: set motd
       become: true
       lineinfile:

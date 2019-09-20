@@ -25,14 +25,26 @@
     - name: install pip
       become: true
       command: easy_install pip
-    - name: run oscap
-      command: oscap xccdf eval --profile standard --results rhel7-content_profile_common.xml /usr/share/xml/scap/ssg/content/ssg-rhel7-ds.xml
+    - name: "run oscap for ds"
+      command: "oscap xccdf eval --profile {{ item }} --results rhel7-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel7-ds.xml"
       ignore_errors: true
       args:
-        creates: rhel7-content_profile_common.xml
+        creates: "rhel7-{{ item }}.xml"
+      loop:
+        - xccdf_org.ssgproject.content_profile_stig-rhel7-disa
+        - xccdf_org.ssgproject.content_profile_ospp
+        - xccdf_org.ssgproject.content_profile_pci-dss
+        - xccdf_org.ssgproject.content_profile_rht-ccp
+        - xccdf_org.ssgproject.content_profile_C2S
+        - xccdf_org.ssgproject.content_profile_ospp42
+        - xccdf_org.ssgproject.content_profile_cjis
+        - xccdf_org.ssgproject.content_profile_standard
+        - xccdf_org.ssgproject.content_profile_rhelh-vpp
+        - xccdf_org.ssgproject.content_profile_hipaa
+        - xccdf_org.ssgproject.content_profile_nist-800-171-cui
     - name: set motd
       become: true
       lineinfile:
         path: /etc/motd
-        line: 'sudo insights-client --payload rhel7-content_profile_common.xml --content-type application/vnd.redhat.compliance.something+tgz'
+        line: 'sudo insights-client --payload rhel7-xccdf_org.ssgproject.content_profile_standard --content-type application/vnd.redhat.compliance.something+tgz'
 ...
