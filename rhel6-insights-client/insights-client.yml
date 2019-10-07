@@ -57,29 +57,30 @@
         - xccdf_org.ssgproject.content_profile_pci-dss
         - xccdf_org.ssgproject.content_profile_nist-cl-il-al
 
-    # - name: install insights-client
-    #   become: true
-    #   command: sh lay-the-eggs.sh
-    #   args:
-    #     chdir: /home/vagrant/insights-client
+    - name: install insights-client
+      become: true
+      command: sh lay-the-eggs.sh
+      args:
+        chdir: /home/vagrant/insights-client
 
     - name: update config
       become: true
       blockinfile:
         path: /etc/insights-client/insights-client.conf
         block: |
-          #upload_url=https://ci.cloud.paas.psi.redhat.com/api/ingress/v1/upload
+          #upload_url=https://ci.cloud.redhat.com/api/ingress/v1/upload
           cert_verify=False
           upload_url=http://localhost:8080/api/ingress/v1/upload
           auto_config=False
           auto_update=False
           legacy_upload=False
 
-    # - name: Install insights from local filesystem via pip
-    #   become: true
-    #   pip:
-    #     name: file:///home/vagrant/insights-core#egg=insights
-    #     extra_args: "-I"
+    - name: Install insights from local filesystem via pip
+      become: true
+      command: scl enable python27 'pip install -I file:///home/vagrant/insights-core#egg=insights'
+      # pip:
+      #   name: file:///home/vagrant/insights-core#egg=insights
+      #   extra_args: "-I"
 
     - name: set motd
       become: true
