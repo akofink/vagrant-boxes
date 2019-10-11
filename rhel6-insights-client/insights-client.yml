@@ -38,6 +38,7 @@
           - python2-devel
           - sudo
           - git
+          - zip
 
     - name: "run oscap for ds"
       command: "oscap xccdf eval --profile {{ item }} --results rhel6-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel6-ds.xml"
