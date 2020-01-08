@@ -5,6 +5,7 @@
       become: true
       redhat_subscription:
         server_hostname: https://subscription.rhsm.stage.redhat.com
+        # server_hostname: https://subscription.rhsm.qa.redhat.com
         server_insecure: true
         username: rhn-engineering-akofink
         password: redhat
@@ -48,6 +49,18 @@
         - xccdf_org.ssgproject.content_profile_standard
         - xccdf_org.ssgproject.content_profile_C2S
         - xccdf_org.ssgproject.content_profile_cjis
+        - standard
+        - hipaa
+
+    - name: clone insights-client and insights-core repos
+      git:
+        repo: "https://github.com/RedHatInsights/{{ item }}.git"
+        dest: "/home/vagrant/{{ item }}"
+      args:
+        creates: "/home/vagrant/{{ item }}"
+      loop:
+        - insights-client
+        - insights-core
 
     - name: install insights-client
       become: true
@@ -60,12 +73,16 @@
       blockinfile:
         path: /etc/insights-client/insights-client.conf
         block: |
-          #upload_url=https://ci.cloud.paas.psi.redhat.com/api/ingress/v1/upload
+          authmethod=BASIC
+          username=rhn-engineering-akofink
+          password=redhat
+          #upload_url=https://ci.cloud.redhat.com/api/ingress/v1/upload
           cert_verify=False
           upload_url=http://localhost:8080/api/ingress/v1/upload
           auto_config=False
           auto_update=False
           legacy_upload=False
+          debug=True
 
     - name: Install insights from local filesystem via pip
       become: true
@@ -77,6 +94,8 @@
       blockinfile:
         path: /etc/motd
         block: |
+          # Some useful example commands:
           sudo BYPASS_GPG=true insights-client --no-gpg --payload ~/rhel7-xccdf_org.ssgproject.content_profile_standard.xml --content-type application/vnd.redhat.compliance.something+tgz --net-debug --verbose
           find ~/rhel7-xccdf_org.ssgproject.content_profile_*.xml | xargs -I{} sudo BYPASS_GPG=true insights-client --no-gpg --payload {} --content-type application/vnd.redhat.compliance.something+tgz --net-debug
+          sudo INSIGHTS_GPG=false BYPASS_GPG=true EGG=~/insights-core python ~/insights-client/insights_client/__init__.py --net-debug --verbose --payload ~/rhel7-xccdf_org.ssgproject.content_profile_standard.xml --content-type application/vnd.redhat.compliance.something+tgz
 ...
