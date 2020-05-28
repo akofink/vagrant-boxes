@@ -1,0 +1,18 @@
+# vagrant box add --name rhel7_7 http://dogfood.sat.engineering.redhat.com/pulp/isos/Sat6-CI/Library/custom/Vagrant_Boxes/RHEL_Boxes/rhel-7.7_x86_64-server.box
+# vagrant ssh -- -A -R 8080:localhost:8080
+Vagrant.configure("2") do |config|
+  config.vm.box = "rhel7_7"
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.memory = 1024
+    libvirt.cpus = 2
+    libvirt.qemu_use_session = false
+  end
+
+  config.vm.hostname = "rhel7-insights-client2.virbr0.akofink-laptop"
+  # config.vm.network "private_network", type: "dhcp"
+  config.vm.synced_folder "~/dev/repos/insights-client", "/home/vagrant/insights-client", type: "nfs", nfs_version: 4
+  config.vm.synced_folder "~/dev/repos/insights-core", "/home/vagrant/insights-core", type: "nfs", nfs_version: 4
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "insights-client.yml"
+  end
+end

@@ -39,6 +39,7 @@
           - sudo
           - git
           - zip
+          - python2-ndg_httpsclient
 
     - name: "run oscap for ds"
       command: "oscap xccdf eval --profile {{ item }} --results rhel6-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel6-ds.xml"

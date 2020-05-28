@@ -1,0 +1,10 @@
+[
+  {
+    "account": "1212729",
+    "display_name": "rhel7-insights-client-fake100.virbr0.akofink-laptop",
+    "facts": [],
+    "fqdn": "rhel7-insights-client-fake001.virbr0.akofink-laptop",
+    "reporter": "akofink's local dev machine",
+    "stale_timestamp": "2021-03-04T16:15:44Z"
+  }
+]
