@@ -3,7 +3,8 @@
   tasks:
     - name: register with subscription-manager
       become: true
-      command: subscription-manager register --username rhn-engineering-akofink --password redhat --serverurl https://subscription.rhsm.stage.redhat.com --auto-attach --force
+      command: subscription-manager register --username rhn-engineering-akofink --password redhat --serverurl https://subscription.rhsm.qa.redhat.com --auto-attach --force
+      # command: subscription-manager register --username rhn-engineering-akofink --password redhat --serverurl https://subscription.rhsm.stage.redhat.com --auto-attach --force
       # redhat_subscription: # does not work yet -> https://github.com/ansible/ansible/pull/54815
       #   state: present
       #   username: rhn-engineering-akofink
@@ -35,14 +36,14 @@
     #   become: true
     #   command: easy_install pip
 
-    - name: "run oscap for ds"
-      command: "oscap xccdf eval --profile {{ item }} --results rhel8-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml"
-      ignore_errors: true
-      args:
-        creates: "rhel8-{{ item }}.xml"
-      loop:
-        - xccdf_org.ssgproject.content_profile_pci-dss
-        - xccdf_org.ssgproject.content_profile_ospp
+    # - name: "run oscap for ds"
+    #   command: "oscap xccdf eval --profile {{ item }} --results rhel8-{{ item }}.xml /usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml"
+    #   ignore_errors: true
+    #   args:
+    #     creates: "rhel8-{{ item }}.xml"
+    #   loop:
+    #     - xccdf_org.ssgproject.content_profile_pci-dss
+    #     - xccdf_org.ssgproject.content_profile_ospp
 
     #- name: install insights-client
     #  become: true
